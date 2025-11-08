@@ -4,7 +4,7 @@ A minimal, production-ready starter template with authentication, real-time data
 
 ## Tech Stack
 
-- **[Next.js 15](https://nextjs.org/)** - React framework with App Router
+- **[Next.js 16](https://nextjs.org/)** - React framework with App Router
 - **[Convex](https://convex.dev/)** - Real-time database and backend
 - **[Stack Auth](https://stack-auth.com/)** - Authentication (OAuth, email, magic links)
 - **[shadcn/ui](https://ui.shadcn.com/)** - UI components with Radix UI and Tailwind CSS
@@ -65,11 +65,13 @@ npx convex dev
 ```
 
 This will:
+
 - Prompt you to log in with GitHub
 - Create a Convex project
 - Add `CONVEX_DEPLOYMENT` and `NEXT_PUBLIC_CONVEX_URL` to `.env.local`
 
 **Important:** Add Stack Auth env vars to Convex:
+
 1. Open [Convex Dashboard](https://dashboard.convex.dev/)
 2. Go to Settings → Environment Variables
 3. Add the 3 Stack Auth variables from `.env.local`
@@ -88,7 +90,7 @@ Open [localhost:3000](http://localhost:3000)
 
 ```tsx
 // Client Component - Check auth
-'use client';
+"use client";
 import { useUser } from "@stackframe/stack";
 
 export default function Profile() {
@@ -104,7 +106,7 @@ import { redirect } from "next/navigation";
 
 export default async function Dashboard() {
   const user = await stackServerApp.getUser();
-  if (!user) redirect('/handler/sign-in');
+  if (!user) redirect("/handler/sign-in");
   return <div>Dashboard</div>;
 }
 ```
@@ -134,7 +136,8 @@ export const getTasks = query({
   handler: async (ctx) => {
     const user = await stackServerApp.getPartialUser({ from: "convex", ctx });
     if (!user) return [];
-    return await ctx.db.query("tasks")
+    return await ctx.db
+      .query("tasks")
       .filter((q) => q.eq(q.field("userId"), user.id))
       .collect();
   },
@@ -152,7 +155,7 @@ export const addTask = mutation({
 
 ```tsx
 // Use in component
-'use client';
+"use client";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
@@ -162,7 +165,9 @@ export default function Tasks() {
 
   return (
     <div>
-      {tasks?.map(task => <div key={task._id}>{task.text}</div>)}
+      {tasks?.map((task) => (
+        <div key={task._id}>{task.text}</div>
+      ))}
       <button onClick={() => addTask({ text: "New task" })}>Add</button>
     </div>
   );
@@ -190,6 +195,7 @@ export default function Example() {
 ```
 
 Add more components:
+
 ```bash
 npx shadcn@latest add table
 npx shadcn@latest add form
