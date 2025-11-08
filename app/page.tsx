@@ -4,7 +4,13 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { useUser } from "@stackframe/stack";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +32,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <main className="min-h-screen bg-linear-to-b from-background to-muted/20">
       <div className="container max-w-4xl mx-auto px-4 py-16">
         {/* Header */}
         <div className="text-center mb-12">
@@ -34,10 +40,11 @@ export default function Home() {
             Next.js + Convex + Stack Auth
           </h1>
           <p className="text-muted-foreground mb-6">
-            A minimal starter template with authentication, real-time database, and UI components
+            A minimal starter template with authentication, real-time database,
+            and UI components
           </p>
           <div className="flex flex-wrap gap-2 justify-center">
-            <Badge variant="secondary">Next.js 15</Badge>
+            <Badge variant="secondary">Next.js 16</Badge>
             <Badge variant="secondary">Convex</Badge>
             <Badge variant="secondary">Stack Auth</Badge>
             <Badge variant="secondary">shadcn/ui</Badge>
@@ -49,9 +56,7 @@ export default function Home() {
           <Card>
             <CardHeader>
               <CardTitle>Authentication</CardTitle>
-              <CardDescription>
-                Stack Auth is pre-configured
-              </CardDescription>
+              <CardDescription>Stack Auth is pre-configured</CardDescription>
             </CardHeader>
             <CardContent>
               {user ? (
@@ -77,7 +82,9 @@ export default function Home() {
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                      onClick={() => (window.location.href = "/handler/account-settings")}
+                      onClick={() =>
+                        (window.location.href = "/handler/account-settings")
+                      }
                     >
                       Settings
                     </Button>
@@ -115,9 +122,7 @@ export default function Home() {
           <Card>
             <CardHeader>
               <CardTitle>Real-time Database</CardTitle>
-              <CardDescription>
-                Convex syncs data automatically
-              </CardDescription>
+              <CardDescription>Convex syncs data automatically</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
