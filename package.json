@@ -1,8 +1,30 @@
 {
   "name": "next-convex-stack-template",
-  "version": "0.1.0",
-  "description": "A production-ready Next.js template with Convex backend and Stack Auth pre-configured",
-  "private": true,
+  "version": "1.0.0",
+  "description": "A modern, production-ready Next.js template with Convex backend, Stack Auth, and shadcn/ui pre-configured",
+  "keywords": [
+    "nextjs",
+    "convex",
+    "stack-auth",
+    "shadcn-ui",
+    "typescript",
+    "tailwindcss",
+    "template",
+    "starter",
+    "authentication",
+    "real-time",
+    "database"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Developing-Gamer/next-convex-stack-template"
+  },
+  "bugs": {
+    "url": "https://github.com/Developing-Gamer/next-convex-stack-template/issues"
+  },
+  "homepage": "https://github.com/Developing-Gamer/next-convex-stack-template#readme",
+  "private": false,
   "scripts": {
     "dev": "npm-run-all --parallel dev:frontend dev:backend",
     "dev:frontend": "next dev",
