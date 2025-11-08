@@ -12,6 +12,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@stackframe/stack": "^2.8.49",
     "convex": "^1.28.0",
     "next": "16.0.1",
     "react": "^19.0.0",
