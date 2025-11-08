@@ -3,6 +3,10 @@
     "stack-auth": {
       "type": "http",
       "url": "https://mcp.stack-auth.com/"
+    },
+    "convex": {
+      "command": "npx",
+      "args": ["-y", "convex@latest", "mcp", "start"]
     }
   }
 }
