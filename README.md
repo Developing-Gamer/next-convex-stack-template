@@ -1,156 +1,228 @@
-# Next.js + Convex + Stack Auth Template
+# Next.js + Convex + Stack Auth + shadcn/ui
 
-A clean, production-ready starter template for building full-stack applications with authentication pre-configured.
+A minimal, production-ready starter template with authentication, real-time database, and UI components.
 
-## What's Included
+## Tech Stack
 
-- **Next.js 16** - React framework with App Router
-- **Convex** - Backend-as-a-service (database, server functions, real-time sync)
-- **Stack Auth** - Complete authentication solution with Convex integration
-- **TypeScript** - Type safety throughout
-- **Tailwind CSS** - Utility-first styling
-- **ESLint & Prettier** - Code quality and formatting
+- **[Next.js 15](https://nextjs.org/)** - React framework with App Router
+- **[Convex](https://convex.dev/)** - Real-time database and backend
+- **[Stack Auth](https://stack-auth.com/)** - Authentication (OAuth, email, magic links)
+- **[shadcn/ui](https://ui.shadcn.com/)** - UI components with Radix UI and Tailwind CSS
+- **[TypeScript](https://www.typescriptlang.org/)** - Type safety
+- **[Tailwind CSS](https://tailwindcss.com/)** - Styling
 
-## Features
+## Project Structure
 
-- User authentication (sign up, sign in, sign out)
-- Protected routes and API endpoints
-- Session management
-- Database integration with auth context
-- Real-time updates via Convex
-- Fully typed with TypeScript
+```
+├── app/                    # Next.js app directory
+│   ├── handler/           # Stack Auth pages
+│   ├── layout.tsx         # Root layout with providers
+│   └── page.tsx           # Home page
+├── components/
+│   ├── ConvexClientProvider.tsx  # Convex + Auth integration
+│   └── ui/                # shadcn/ui components
+├── convex/                # Backend code
+│   ├── auth.config.ts    # Auth configuration
+│   ├── myFunctions.ts    # Example queries/mutations
+│   └── schema.ts         # Database schema
+├── stack/                 # Stack Auth config
+│   ├── client.tsx
+│   └── server.tsx
+└── lib/                   # Utilities
+```
 
-## Getting Started
+## Setup
 
 ### 1. Clone and Install
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Developing-Gamer/next-convex-stack-template.git
 cd next-convex-stack-template
 npm install
 ```
 
-### 2. Set Up Stack Auth
+### 2. Configure Environment Variables
 
-Create a free account at [Stack Auth](https://app.stack-auth.com/):
-
-1. Create a new project
-2. Copy your project credentials
-3. Update `.env.local` with your Stack Auth keys:
-
-```env
-# Stack Auth - Get these from https://app.stack-auth.com/
-NEXT_PUBLIC_STACK_PROJECT_ID=your_project_id
-NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=your_publishable_key
-STACK_SECRET_SERVER_KEY=your_secret_key
-
-# Convex
-CONVEX_DEPLOYMENT=your_deployment_name
-NEXT_PUBLIC_CONVEX_URL=your_convex_url
+```bash
+cp .env.example .env.local
 ```
 
-### 3. Set Up Convex
+### 3. Set Up Stack Auth
+
+1. Go to [app.stack-auth.com](https://app.stack-auth.com/) and create a project
+2. Copy credentials to `.env.local`:
+
+```env
+NEXT_PUBLIC_STACK_PROJECT_ID=your_project_id
+NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=your_key
+STACK_SECRET_SERVER_KEY=your_secret
+```
+
+### 4. Set Up Convex
 
 ```bash
 npx convex dev
 ```
 
 This will:
-- Create a Convex deployment (if needed)
-- Set up your database schema
-- Start the Convex dev server
-- Open the Convex dashboard
+- Prompt you to log in with GitHub
+- Create a Convex project
+- Add `CONVEX_DEPLOYMENT` and `NEXT_PUBLIC_CONVEX_URL` to `.env.local`
 
-### 4. Run the Development Server
+**Important:** Add Stack Auth env vars to Convex:
+1. Open [Convex Dashboard](https://dashboard.convex.dev/)
+2. Go to Settings → Environment Variables
+3. Add the 3 Stack Auth variables from `.env.local`
+
+### 5. Run Dev Server
 
 ```bash
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) to see your app!
+Open [localhost:3000](http://localhost:3000)
 
-## Project Structure
+## Usage Examples
 
-```
-├── app/                       # Next.js app directory
-│   ├── layout.tsx            # Root layout with Stack Auth provider
-│   └── page.tsx              # Home page with example messages
-├── components/               # React components
-│   └── ConvexClientProvider.tsx  # Convex client with Stack Auth integration
-├── convex/                   # Convex backend
-│   ├── myFunctions.ts       # Backend functions (queries, mutations)
-│   └── schema.ts            # Database schema
-├── stack/                    # Stack Auth configuration
-│   ├── client.tsx           # Client-side auth setup
-│   └── server.tsx           # Server-side auth setup
-└── public/                   # Static assets
-```
-
-## Example Usage
-
-### Using Authentication
+### Authentication
 
 ```tsx
+// Client Component - Check auth
+'use client';
 import { useUser } from "@stackframe/stack";
 
-export default function MyComponent() {
+export default function Profile() {
   const user = useUser();
-
-  if (!user) {
-    return <div>Please sign in</div>;
-  }
-
-  return <div>Hello, {user.displayName}!</div>;
+  return user ? <div>Hello {user.displayName}</div> : <div>Sign in</div>;
 }
 ```
 
-### Using Convex with Auth Context
+```tsx
+// Server Component - Protect page
+import { stackServerApp } from "@/stack/server";
+import { redirect } from "next/navigation";
+
+export default async function Dashboard() {
+  const user = await stackServerApp.getUser();
+  if (!user) redirect('/handler/sign-in');
+  return <div>Dashboard</div>;
+}
+```
+
+### Convex Database
 
 ```ts
-// convex/myFunctions.ts
-import { query, mutation } from "./_generated/server";
+// convex/schema.ts - Define schema
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
 
-export const myQuery = query({
+export default defineSchema({
+  tasks: defineTable({
+    text: v.string(),
+    userId: v.string(),
+  }).index("by_user", ["userId"]),
+});
+```
+
+```ts
+// convex/tasks.ts - Create functions
+import { v } from "convex/values";
+import { query, mutation } from "./_generated/server";
+import { stackServerApp } from "@stackframe/stack";
+
+export const getTasks = query({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-    // Your query logic here
+    const user = await stackServerApp.getPartialUser({ from: "convex", ctx });
+    if (!user) return [];
+    return await ctx.db.query("tasks")
+      .filter((q) => q.eq(q.field("userId"), user.id))
+      .collect();
+  },
+});
+
+export const addTask = mutation({
+  args: { text: v.string() },
+  handler: async (ctx, args) => {
+    const user = await stackServerApp.getPartialUser({ from: "convex", ctx });
+    if (!user) throw new Error("Not authenticated");
+    await ctx.db.insert("tasks", { text: args.text, userId: user.id });
   },
 });
 ```
 
-## Customization
+```tsx
+// Use in component
+'use client';
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
-- **Frontend**: Edit files in `app/` directory
-- **Backend**: Edit files in `convex/` directory
-- **Styling**: Modify `app/globals.css` and Tailwind classes
-- **Auth Settings**: Configure in Stack Auth dashboard
+export default function Tasks() {
+  const tasks = useQuery(api.tasks.getTasks);
+  const addTask = useMutation(api.tasks.addTask);
 
-## Learn More
+  return (
+    <div>
+      {tasks?.map(task => <div key={task._id}>{task.text}</div>)}
+      <button onClick={() => addTask({ text: "New task" })}>Add</button>
+    </div>
+  );
+}
+```
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Convex Documentation](https://docs.convex.dev/)
-- [Stack Auth Documentation](https://docs.stack-auth.com/)
-- [Convex + Stack Auth Integration](https://docs.stack-auth.com/integrations/convex)
+### UI Components
+
+```tsx
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export default function Example() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Title</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Button>Click me</Button>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+Add more components:
+```bash
+npx shadcn@latest add table
+npx shadcn@latest add form
+```
 
 ## Deployment
 
-### Deploy Convex Backend
-
-```bash
-npx convex deploy
-```
-
 ### Deploy to Vercel
 
-1. Push your code to GitHub
-2. Import your repository in Vercel
-3. Add environment variables from `.env.local`
-4. Deploy!
+1. Push code to GitHub
+2. Deploy Convex: `npx convex deploy`
+3. Import to [Vercel](https://vercel.com)
+4. Add environment variables (use production Convex URL)
+5. Update Stack Auth dashboard with production domain
 
-Your Convex backend and Next.js frontend will work seamlessly in production.
+## Scripts
+
+```bash
+npm run dev              # Run frontend + backend
+npm run dev:frontend     # Next.js only
+npm run dev:backend      # Convex only
+npm run build            # Build for production
+npm run lint             # Lint code
+npx convex deploy        # Deploy backend
+```
+
+## Learn More
+
+- [Next.js Docs](https://nextjs.org/docs)
+- [Convex Docs](https://docs.convex.dev/)
+- [Stack Auth Docs](https://docs.stack-auth.com/)
+- [shadcn/ui Docs](https://ui.shadcn.com/)
+- [Convex + Stack Auth Guide](https://docs.stack-auth.com/docs/others/convex)
 
 ## License
 
